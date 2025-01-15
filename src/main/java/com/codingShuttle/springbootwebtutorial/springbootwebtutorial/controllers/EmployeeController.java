@@ -2,10 +2,12 @@ package com.codingShuttle.springbootwebtutorial.springbootwebtutorial.controller
 
 
 import com.codingShuttle.springbootwebtutorial.springbootwebtutorial.dto.EmployeeDTO;
+import com.codingShuttle.springbootwebtutorial.springbootwebtutorial.entities.EmployeeEntity;
+import com.codingShuttle.springbootwebtutorial.springbootwebtutorial.repositories.EmployeeRepository;
 import org.springframework.web.bind.annotation.*;
 
-import javax.naming.Name;
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "/employees")
@@ -17,17 +19,29 @@ public class EmployeeController {
 //        return  "Secret message: jbsjxasklxnslk@123";
 //    }
 
+    private  final EmployeeRepository employeeRepository;
+    public EmployeeController(EmployeeRepository employeeRepository) {
+        this.employeeRepository = employeeRepository;
+    }
+
     @GetMapping("/{employeeId}")//Dynamic URL paths
-    public EmployeeDTO getEmployeeById(@PathVariable(name = "employeeId") Long employeeId){
-        return  new EmployeeDTO(employeeId,"Arpit","arpitbeuria196@gmail.com",27, LocalDate.of(2024,12,31),true);
+    public EmployeeEntity getEmployeeById(@PathVariable(name = "employeeId") Long employeeId){
+        return  employeeRepository.findById(employeeId).orElse(null);
     }
 
     @GetMapping
-    public  String getEmployees(@RequestParam Integer age,
-                                @RequestParam String Name)
+    public List<EmployeeEntity> getEmployees()
     {
-        return  "Hi My age is"+ age + "And My Name is"+Name;
+        return  employeeRepository.findAll();
     }
+
+    @PostMapping
+    public  EmployeeEntity  createNewEmployee(@RequestBody EmployeeEntity inputEmployee)
+    {
+        return  employeeRepository.save(inputEmployee);
+    }
+
+
 
 
 }
