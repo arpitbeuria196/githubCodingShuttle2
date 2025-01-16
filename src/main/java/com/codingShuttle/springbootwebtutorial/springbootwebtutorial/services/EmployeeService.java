@@ -3,6 +3,7 @@ package com.codingShuttle.springbootwebtutorial.springbootwebtutorial.services;
 
 import com.codingShuttle.springbootwebtutorial.springbootwebtutorial.dto.EmployeeDTO;
 import com.codingShuttle.springbootwebtutorial.springbootwebtutorial.entities.EmployeeEntity;
+import com.codingShuttle.springbootwebtutorial.springbootwebtutorial.exceptions.ResourceNotFoundException;
 import com.codingShuttle.springbootwebtutorial.springbootwebtutorial.repositories.EmployeeRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.util.ReflectionUtils;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,10 +30,10 @@ public class EmployeeService {
 
 
     public EmployeeDTO getEmployeeById(Long employeeId) {
-        EmployeeEntity employeeEntity = employeeRepository.findById(employeeId).orElse(null);
-        return  modelMapper.map(employeeEntity,EmployeeDTO.class);
+        EmployeeEntity employeeEntity = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee Not Found"));
 
-
+        return modelMapper.map(employeeEntity, EmployeeDTO.class);
     }
 
     public List<EmployeeDTO> getAllEmployees() {
@@ -50,6 +52,8 @@ public class EmployeeService {
     }
 
     public EmployeeDTO updateEmployeeId(Long employeeId, EmployeeDTO employeeDTO) {
+        boolean exists = employeeRepository.existsById(employeeId);
+        if(!exists) throw new ResourceNotFoundException("Employee not found with ID:"+employeeId);
      EmployeeEntity employeeEntity = modelMapper.map(employeeDTO,EmployeeEntity.class);
      employeeEntity.setId(employeeId);
      EmployeeEntity saveEmployeeEntity = employeeRepository.save(employeeEntity);
